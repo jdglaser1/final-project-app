@@ -10,8 +10,10 @@ import {
   StyleSheet,
   ScrollView,
   Modal,
+  Dimensions,
 } from 'react-native';
 import { useSQLiteContext } from 'expo-sqlite';
+import { PieChart } from 'react-native-chart-kit';
 
 export default function ExpenseScreen() {
   const db = useSQLiteContext();
@@ -28,6 +30,7 @@ export default function ExpenseScreen() {
   const [editCategory, setEditCategory] = useState('');
   const [editNote, setEditNote] = useState('');
   const [editDate, setEditDate] = useState('');
+  const [chartExpanded, setChartExpanded] = useState(false);
 
    const loadExpenses = async () => {
     const rows = await db.getAllAsync(
@@ -335,22 +338,31 @@ useEffect(() => {
     }
   })();
 
-
+  // Prepare pie chart data
+  const chartColors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#fbbf24', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899'];
+  const pieChartData = categoryTotals.length > 0 ? categoryTotals.map((ct, idx) => ({
+    name: ct.category, // Just category name
+    population: ct.sum, // Value for chart slices
+    color: chartColors[idx % chartColors.length],
+    legendFontColor: '#e5e7eb',
+    legendFontSize: 13,
+  })) : [];
 
 return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.heading}>Student Expense Tracker</Text>
+      <ScrollView>
+        <Text style={styles.heading}>Student Expense Tracker</Text>
 
-      {selectedCategory ? (
-        <View style={styles.selectedCategoryPill}>
-          <Text style={styles.selectedCategoryText}>{selectedCategory}</Text>
-          <TouchableOpacity onPress={() => setSelectedCategory(null)}>
-            <Text style={styles.selectedCategoryClear}>✕</Text>
-          </TouchableOpacity>
-        </View>
-      ) : null}
+        {selectedCategory ? (
+          <View style={styles.selectedCategoryPill}>
+            <Text style={styles.selectedCategoryText}>{selectedCategory}</Text>
+            <TouchableOpacity onPress={() => setSelectedCategory(null)}>
+              <Text style={styles.selectedCategoryClear}>✕</Text>
+            </TouchableOpacity>
+          </View>
+        ) : null}
 
-      <View style={styles.filterContainer}>
+        <View style={styles.filterContainer}>
         <TouchableOpacity
           style={[styles.filterButton, filter === 'all' && styles.filterButtonActive]}
           onPress={() => setFilter('all')}
@@ -370,6 +382,35 @@ return (
           <Text style={filter === 'month' ? styles.filterTextActive : styles.filterText}>This Month</Text>
         </TouchableOpacity>
       </View>
+
+        {/* Collapsible Chart Section */}
+        <TouchableOpacity 
+          style={styles.chartToggle} 
+          onPress={() => setChartExpanded(!chartExpanded)}
+        >
+          <Text style={styles.chartToggleText}>
+            {chartExpanded ? '📉 Hide' : '📊 Show'} Spending Chart
+          </Text>
+          <Text style={styles.chartToggleIcon}>{chartExpanded ? '▼' : '▶'}</Text>
+        </TouchableOpacity>
+
+        {chartExpanded && categoryTotals.length > 0 && (
+          <View style={styles.chartSection}>
+            <PieChart
+              data={pieChartData}
+              width={Dimensions.get('window').width - 48}
+              height={220}
+              chartConfig={{
+                color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+              }}
+              accessor="population"
+              backgroundColor="transparent"
+              paddingLeft="15"
+              absolute
+            />
+          </View>
+        )}
 
       <View style={styles.form}>
         <TextInput
@@ -407,16 +448,28 @@ return (
         <Button title="Add Expense" onPress={addExpense} />
       </View>
 
-      
+        
 
-      <FlatList
-        data={visibleExpenses}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={renderExpense}
-        ListEmptyComponent={
+        {visibleExpenses.length > 0 ? (
+          visibleExpenses.map((item) => (
+            <View key={item.id} style={styles.expenseRow}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.expenseAmount}>${Number(item.amount).toFixed(2)}</Text>
+                <Text style={styles.expenseCategory}>{item.category}</Text>
+                {item.note ? <Text style={styles.expenseNote}>{item.note}</Text> : null}
+                {item.date ? <Text style={styles.expenseDate}>{item.date}</Text> : null}
+              </View>
+              <TouchableOpacity onPress={() => openEdit(item)}>
+                <Text style={styles.edit}>Edit</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => deleteExpense(item.id)}>
+                <Text style={styles.delete}>✕</Text>
+              </TouchableOpacity>
+            </View>
+          ))
+        ) : (
           <Text style={styles.empty}>No expenses yet.</Text>
-        }
-      />
+        )}
 
       <Modal visible={!!editItem} transparent animationType="slide">
         <View style={styles.modalContainer}>
@@ -470,11 +523,6 @@ return (
         </View>
       </Modal>
 
-      <View style={styles.totalRow}>
-        <Text style={styles.totalLabel}>Total ({filter === 'all' ? 'All' : filter === 'week' ? 'This week' : 'This month'}):</Text>
-        <Text style={styles.totalAmount}>${total.toFixed(2)}</Text>
-      </View>
-
       {/* By Category summary moved to the bottom, same style area as total */}
       {categoryTotals && categoryTotals.length > 0 ? (
         <View style={styles.categorySummaryBlock}>
@@ -487,9 +535,10 @@ return (
         </View>
       ) : null}
 
-      <Text style={styles.footer}>
-        Enter your expenses and they’ll be saved locally with SQLite.
-      </Text>
+        <Text style={styles.footer}>
+          Enter your expenses and they'll be saved locally with SQLite.
+        </Text>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -676,5 +725,32 @@ return (
   modalButtonText: {
     color: '#fff',
     fontWeight: '600',
+  },
+  chartToggle: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#0f172a',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#374151',
+  },
+  chartToggleText: {
+    color: '#e5e7eb',
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  chartToggleIcon: {
+    color: '#9ca3af',
+    fontSize: 12,
+  },
+  chartSection: {
+    backgroundColor: '#0f172a',
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 16,
+    alignItems: 'center',
   },
 });
