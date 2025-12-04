@@ -23,6 +23,6 @@ $XX.XX'. The legend still displays the spend amount before 'Category: $XX.XX' an
 
 6. Adjust chart positioning: "The pie chart gets cut off on the left side, can we move it slightly. Just a little more to the right"
 
-Copilot suggested that i add a separate screen or page for the pie chart but it did not function well or look clean. I instead decided on a collapsible section.
+Copilot suggested that I add a separate screen or page for the pie chart but it did not function well or look clean. I instead decided on a collapsible section.
 
-One area copilot saved me time was it was able to reduce the time spent on the actual coding needed to implement and format the pie chart, this allowed me to focus on the visual aspect. I also was able to add a scrolling element to the entire page making it easier to view.
+One area copilot saved me time was it was able to reduce the time spent on the actual coding needed to implement and format the pie chart, this allowed me to focus on the visual aspect. I also was able to add a scrolling element to the entire page making it easier to view. 
