@@ -396,19 +396,32 @@ return (
 
         {chartExpanded && categoryTotals.length > 0 && (
           <View style={styles.chartSection}>
-            <PieChart
-              data={pieChartData}
-              width={Dimensions.get('window').width - 48}
-              height={220}
-              chartConfig={{
-                color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-                labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-              }}
-              accessor="population"
-              backgroundColor="transparent"
-              paddingLeft="15"
-              absolute
-            />
+            <View style={styles.chartRow}>
+              <View style={styles.chartWrapper}>
+                <PieChart
+                  data={pieChartData}
+                  width={200}
+                  height={200}
+                  chartConfig={{
+                    color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                    labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                  }}
+                  accessor="population"
+                  backgroundColor="transparent"
+                  paddingLeft="30"
+                  absolute
+                  hasLegend={false}
+                />
+              </View>
+              <View style={styles.customLegend}>
+                {categoryTotals.map((ct, idx) => (
+                  <View key={ct.category} style={styles.legendItem}>
+                    <View style={[styles.legendDot, { backgroundColor: chartColors[idx % chartColors.length] }]} />
+                    <Text style={styles.legendText}>{ct.category}: ${ct.sum.toFixed(2)}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
           </View>
         )}
 
@@ -751,6 +764,34 @@ return (
     padding: 16,
     borderRadius: 8,
     marginBottom: 16,
+  },
+  chartRow: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  chartWrapper: {
+    marginLeft: 20,
+  },
+  customLegend: {
+    flex: 1,
+    marginLeft: 16,
+    justifyContent: 'center',
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  legendDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: 8,
+  },
+  legendText: {
+    color: '#e5e7eb',
+    fontSize: 13,
   },
 });
