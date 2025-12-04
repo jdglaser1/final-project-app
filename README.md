@@ -8,7 +8,7 @@ Instructions
 
 CoPilot Reflection
 
-For this project I chose option a, and added a chart to the previos project, the follwing is a summary of my prompts I used to get the app to funtion properly
+For this project I chose option a, and added a chart to the previous project, the following is a summary of my prompts I used to get the app to function properly
 
 1. Initial request: "Now let's add a collapsible chart section. In this section let's add a pie chart that shows spend and category"
 
@@ -22,3 +22,7 @@ $XX.XX'. The legend still displays the spend amount before 'Category: $XX.XX' an
 5. Reposition elements: "Can you make the legend next to the pie chart"
 
 6. Adjust chart positioning: "The pie chart gets cut off on the left side, can we move it slightly. Just a little more to the right"
+
+Copilot suggested that i add a separate screen or page for the pie chart but it did not function well or look clean. I instead decided on a collapsible section.
+
+One area copilot saved me time was it was able to reduce the time spent on the actual coding needed to implement and format the pie chart, this allowed me to focus on the visual aspect. I also was able to add a scrolling element to the entire page making it easier to view.
